@@ -96,7 +96,7 @@ apply(){
 	  "$@"
 }
 
-inspect(){
+init(){
 	local chartish repo info name version ns
 	chartish="$1"
 	repo=$(_chartish2uri "$chartish")
