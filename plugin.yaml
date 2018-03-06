@@ -1,0 +1,10 @@
+name: "release-helper"
+# Version is the version of Helm plus the number of official builds for this
+# plugin
+version: "0.1.0"
+description: "Manage helm releases declaratively"
+command: "$HELM_PLUGIN_DIR/release-helper.sh"
+useTunnel: true
+ignoreFlags: false
+hooks:
+  install: "$HELM_PLUGIN_DIR/install.sh"
