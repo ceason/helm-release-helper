@@ -16,26 +16,21 @@ _extract-var(){
 _extract-vars(){
 	VALUES_FILE=$1
 	RELEASE_NAME=${VALUES_FILE%.*}
-	local required_vars=(
+	local vars=(
 		RELEASE_NAMESPACE
 		CHART_REPOSITORY
 		CHART_NAME
 		CHART_VERSION
-	)
-	for var in ${required_vars[@]}; do
-		_extract-var $VALUES_FILE $var
-		if [ -z "${!var}" ]; then
-			echo "${var} must be non-empty"
-			return 1
-		fi
-	done
-	local optional_vars=(
 		HELM_EXTRA_ARGS
 	)
-	for var in ${optional_vars[@]}; do
+	for var in ${vars[@]}; do
 		_extract-var $VALUES_FILE $var
 	done
-	CHART_URI="$CHART_REPOSITORY/$CHART_NAME-$CHART_VERSION.tgz"
+	if [ -e "${CHART_REPOSITORY}/Chart.yaml" ]; then
+		CHART_URI="$CHART_REPOSITORY"
+	else
+		CHART_URI="$CHART_REPOSITORY/$CHART_NAME-$CHART_VERSION.tgz"
+	fi
 }
 
 _chartish2uri(){
