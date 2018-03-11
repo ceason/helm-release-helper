@@ -45,7 +45,7 @@ _chartish2uri(){
 	if [[ "$chartish" =~ $rgx ]]; then
 		# this looks like a chart in a repository, so try to look up the repo's URI
 		local repo_name=$(echo "$chartish"|cut -d'/' -f1)
-		"$HELM_BIN" repo list|grep "^$repo_name "|head -1|cut -f2
+		"$HELM_BIN" repo list|grep "^$repo_name[^\w]"|head -1|cut -f2
 		return 0
 	fi
 	(>&2 echo "Could not match the provided 'chartish' as either a URL or chart repository reference: $chartish")
