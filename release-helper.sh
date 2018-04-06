@@ -91,6 +91,38 @@ apply(){
 	  "$@"
 }
 
+template(){
+	_extract-vars $1
+	shift
+
+	local tmp_dir=$(mktemp -d -t helmchart-XXXXXX)
+	local fetch_dir=$tmp_dir/fetch
+	local template_dir=$tmp_dir/template
+
+	"$HELM_BIN" fetch $CHART_URI --untar --untardir=$fetch_dir
+
+	# need to find the dir with Chart.yaml in it (urgh)
+	local chart_dir=$(dirname $(find $fetch_dir -maxdepth 2 -type f -name Chart.yaml|head -1))
+
+	mkdir -p "$template_dir"
+
+	"$HELM_BIN" template $chart_dir \
+	  --name $RELEASE_NAME \
+	  --namespace=$RELEASE_NAMESPACE \
+	  --output-dir=$template_dir \
+	  --values=$VALUES_FILE
+
+	# find where the manifests were rendered out to (must be a better way??)
+	local manifest_dir=$(find "$template_dir" -type d -name templates|head -1)
+
+	mkdir -p $RELEASE_NAME
+
+	cp $manifest_dir/* $RELEASE_NAME/.
+
+	rm -rf $tmp_dir
+}
+
+
 init(){
 	local chartish repo info name version ns
 	chartish="$1"
