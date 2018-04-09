@@ -112,12 +112,26 @@ template(){
 	  --output-dir=$template_dir \
 	  --values=$VALUES_FILE
 
-	# find where the manifests were rendered out to (must be a better way??)
-	local manifest_dir=$(find "$template_dir" -type d -name templates|head -1)
-
 	mkdir -p $RELEASE_NAME
 
-	cp $manifest_dir/* $RELEASE_NAME/.
+	# find where the manifests were rendered out to (must be a better way??)
+#	local manifest_dir=$(find "$template_dir" -type d -name templates|head -1)
+#	cp $manifest_dir/* $RELEASE_NAME/.
+
+#	for manifest_dir in $(find "$template_dir" -type d -name templates); do
+#		cp $manifest_dir/*.yaml $RELEASE_NAME/.
+#	done
+
+	for f in $(find "$template_dir" -type f -name \*.yaml); do
+		local tgt_name=$(kubectl apply --dry-run -f "$f" -ogo-template='{{.metadata.name}}-{{.kind}}.yaml')
+		local tgt_file="$RELEASE_NAME/${tgt_name,,}"
+		if [ -e "$tgt_file" ]; then
+			echo "Skipping, file exists: $tgt_file"
+		else
+			echo "Writing: $tgt_file"
+			cp "$f" "$tgt_file"
+		fi
+	done
 
 	rm -rf $tmp_dir
 }
